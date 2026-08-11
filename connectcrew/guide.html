@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ConnectCrew 導入ガイド</title>
+<style>
+  /* ---- tokens ---- */
+  :root {
+    --bg: #f5f2ea;            /* 昼: 温かい紙色 */
+    --panel: #fdfcf8;
+    --panel2: #efeadd;
+    --border: #ddd5c2;
+    --ink: #23222b;
+    --muted: #7a7566;
+    --gold: #a8842e;          /* 昼はコントラスト確保のため深めの金 */
+    --gold-soft: rgba(168,132,46,.12);
+    --ok: #2e7d54;
+    --link: #2f5fb3;
+    --phone-bg: #101118;      /* モックアップ内は常にアプリ実物の夜色 */
+    --phone-panel: #1a1c26;
+    --phone-border: #2c2f3e;
+    --phone-ink: #efedf5;
+    --phone-muted: #8f8da0;
+    --phone-gold: #d9b45b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e0f15; --panel: #16171f; --panel2: #1d1f2b; --border: #2b2d3c;
+      --ink: #efedf3; --muted: #97949f; --gold: #d9b45b;
+      --gold-soft: rgba(217,180,91,.14); --ok: #58c48f; --link: #8fb0f2;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e0f15; --panel: #16171f; --panel2: #1d1f2b; --border: #2b2d3c;
+    --ink: #efedf3; --muted: #97949f; --gold: #d9b45b;
+    --gold-soft: rgba(217,180,91,.14); --ok: #58c48f; --link: #8fb0f2;
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f2ea; --panel: #fdfcf8; --panel2: #efeadd; --border: #ddd5c2;
+    --ink: #23222b; --muted: #7a7566; --gold: #a8842e;
+    --gold-soft: rgba(168,132,46,.12); --ok: #2e7d54; --link: #2f5fb3;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Hiragino Sans", "Noto Sans JP", -apple-system, sans-serif;
+    font-size: 15.5px; line-height: 1.9; -webkit-font-smoothing: antialiased;
+  }
+  .serif { font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif; }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+  .wrap { max-width: 680px; margin: 0 auto; padding: 0 20px 90px; }
+
+  /* ---- hero ---- */
+  header.hero { text-align: center; padding: 64px 0 30px; }
+  .hero .eyebrow { letter-spacing: .32em; font-size: 11px; color: var(--gold);
+    text-transform: uppercase; }
+  .hero h1 { font-size: clamp(30px, 7vw, 42px); margin: 14px 0 10px; line-height: 1.35;
+    text-wrap: balance; font-weight: 600; }
+  .hero h1 .gold { color: var(--gold); }
+  .hero p { color: var(--muted); max-width: 34em; margin: 0 auto; }
+  .hero .rule { width: 54px; height: 1px; background: var(--gold); margin: 26px auto 0; }
+
+  /* ---- 目次 ---- */
+  nav.toc { display: grid; gap: 8px; margin: 30px 0 10px; }
+  nav.toc a { display: flex; align-items: baseline; gap: 12px; text-decoration: none;
+    color: var(--ink); background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 11px 16px; }
+  nav.toc a:hover { border-color: var(--gold); }
+  nav.toc .no { color: var(--gold); font-size: 13px; min-width: 1.6em; }
+  nav.toc .who { margin-left: auto; font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+  /* ---- 章 ---- */
+  section { margin-top: 64px; scroll-margin-top: 20px; }
+  .ch-head { display: flex; align-items: baseline; gap: 14px;
+    border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 8px; }
+  .ch-head .no { color: var(--gold); font-size: 15px; }
+  .ch-head h2 { font-size: 23px; margin: 0; font-weight: 600; text-wrap: balance; }
+  .who-chip { font-size: 11px; padding: 2px 10px; border-radius: 999px; white-space: nowrap;
+    border: 1px solid var(--gold); color: var(--gold); margin-left: auto; }
+  .lead { color: var(--muted); margin: 10px 0 4px; }
+
+  /* ---- ステップ ---- */
+  .step { display: flex; gap: 14px; margin-top: 26px; }
+  .step .n { flex: none; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--gold-soft); color: var(--gold); border: 1px solid var(--gold);
+    display: grid; place-items: center; font-size: 13px; font-weight: 700; margin-top: 3px; }
+  .step .body { min-width: 0; flex: 1; }
+  .step h3 { margin: 4px 0 6px; font-size: 16.5px; }
+  .step p { margin: 0 0 8px; color: var(--muted); }
+  .step p strong, .note strong { color: var(--ink); font-weight: 600; }
+
+  /* 実際のアプリ文言の引用 */
+  .quote { border-left: 2px solid var(--gold); padding: 2px 14px; margin: 10px 0;
+    color: var(--muted); font-size: 13.5px; background: var(--gold-soft); border-radius: 0 8px 8px 0; }
+
+  .btn { display: inline-block; margin: 6px 10px 6px 0; padding: 10px 18px; border-radius: 10px;
+    background: var(--gold); color: #16130a; font-weight: 700; text-decoration: none; font-size: 14.5px; }
+  .btn:hover { filter: brightness(1.06); }
+  .code-pill { display: inline-block; background: var(--panel2); border: 1px dashed var(--gold);
+    color: var(--gold); border-radius: 8px; padding: 2px 12px; font-weight: 700; }
+
+  .note { background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 18px; margin: 22px 0 0; font-size: 14px; color: var(--muted); }
+  .note .t { color: var(--gold); font-weight: 700; font-size: 12px; letter-spacing: .12em; }
+
+  /* ---- スマホ画面モックアップ(中身は常にアプリ実物の夜色) ---- */
+  .shot { margin: 14px 0 4px; display: flex; justify-content: flex-start; }
+  .phone { width: min(300px, 86vw); background: var(--phone-bg); border-radius: 26px;
+    border: 1px solid var(--phone-border); padding: 14px 14px 18px;
+    box-shadow: 0 14px 34px rgba(0,0,0,.28); color: var(--phone-ink);
+    font-size: 12.5px; line-height: 1.7; }
+  .phone .notch { width: 74px; height: 5px; border-radius: 3px; background: var(--phone-border);
+    margin: 0 auto 12px; }
+  .phone .bar { text-align: center; font-weight: 700; color: var(--phone-gold);
+    letter-spacing: .06em; margin-bottom: 10px; }
+  .phone .card { background: var(--phone-panel); border: 1px solid var(--phone-border);
+    border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .phone .h { font-weight: 700; margin-bottom: 2px; }
+  .phone .d { color: var(--phone-muted); font-size: 11px; }
+  .phone .field { background: #0c0d13; border: 1px solid var(--phone-border); border-radius: 9px;
+    padding: 8px 10px; color: var(--phone-muted); margin: 8px 0; }
+  .phone .field b { color: var(--phone-gold); letter-spacing: .1em; }
+  .phone .gbtn { background: var(--phone-gold); color: #16130a; text-align: center;
+    border-radius: 9px; padding: 9px; font-weight: 800; margin-top: 8px; }
+  .phone .obtn { border: 1px solid var(--phone-border); color: var(--phone-ink); text-align: center;
+    border-radius: 9px; padding: 8px; margin-top: 8px; }
+  .phone .row { display: flex; align-items: center; gap: 9px; padding: 7px 2px;
+    border-bottom: 1px solid var(--phone-border); }
+  .phone .row:last-child { border-bottom: none; }
+  .phone .ava { flex: none; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--phone-border); display: grid; place-items: center; font-size: 12px; }
+  .phone .tag { margin-left: auto; font-size: 10px; color: var(--phone-gold);
+    border: 1px solid var(--phone-gold); border-radius: 999px; padding: 0 7px; white-space: nowrap; }
+  .phone .seg { display: flex; border: 1px solid var(--phone-border); border-radius: 9px;
+    overflow: hidden; margin-bottom: 10px; }
+  .phone .seg div { flex: 1; text-align: center; padding: 6px 0; color: var(--phone-muted); font-size: 11px; }
+  .phone .seg .on { background: var(--phone-panel); color: var(--phone-gold); font-weight: 700; }
+  .phone .wait { text-align: center; padding: 14px 6px; }
+  .phone .wait .big { font-size: 15px; font-weight: 800; color: var(--phone-gold); margin-bottom: 6px; }
+
+  .flow-note { font-size: 12px; color: var(--muted); margin: 4px 0 0 2px; }
+
+  footer { margin-top: 80px; text-align: center; color: var(--muted); font-size: 12.5px;
+    border-top: 1px solid var(--border); padding-top: 24px; }
+  a { color: var(--link); }
+  @media (prefers-reduced-motion: no-preference) {
+    section { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow serif">Connect Crew Guide</div>
+  <h1 class="serif">コネクトクルー<br><span class="gold">導入から初回ナビ連携まで</span></h1>
+  <p>アプリを入れて、店の招待コードで参加して、承認されて、初回ナビとつながるまで。この順番どおりに進めれば迷いません。</p>
+  <div class="rule"></div>
+</header>
+
+<nav class="toc">
+  <a href="#install"><span class="no serif">一</span>アプリを入れる<span class="who">全員</span></a>
+  <a href="#join"><span class="no serif">二</span>店舗に参加する<span class="who">キャスト・スタッフ</span></a>
+  <a href="#approve"><span class="no serif">三</span>参加を承認する<span class="who">店長・管理者</span></a>
+  <a href="#shokanavi"><span class="no serif">四</span>初回ナビとつなぐ<span class="who">店長・管理者</span></a>
+  <a href="#roster"><span class="no serif">五</span>キャスト名簿の読み込み<span class="who">店長・管理者</span></a>
+  <a href="#faq"><span class="no serif">六</span>つまずいたら<span class="who">全員</span></a>
+</nav>
+
+<!-- ================================================================ -->
+<section id="install">
+  <div class="ch-head"><span class="no serif">第一章</span><h2>アプリを入れる</h2><span class="who-chip">全員</span></div>
+  <p class="lead">iPhoneはTestFlight(Appleの配布アプリ)経由で入れます。下のボタンを押すとそのまま案内が始まります。</p>
+
+  <div class="step"><div class="n">1</div><div class="body">
+    <h3>TestFlightを入れる</h3>
+    <p>App Storeで「TestFlight」を検索して入れておきます(青いアイコン)。すでにあれば次へ。</p>
+  </div></div>
+
+  <div class="step"><div class="n">2</div><div class="body">
+    <h3>Connect Crew を受け取る</h3>
+    <p>キャスト・スタッフ全員が入れるアプリです。</p>
+    <a class="btn" href="https://testflight.apple.com/join/r6h93rdC">Connect Crew を入れる</a>
+  </div></div>
+
+  <div class="step"><div class="n">3</div><div class="body">
+    <h3>初回ナビを受け取る(担当者のみ)</h3>
+    <p>初回の采配をする端末(店のiPadなど)にだけ入れます。キャスト全員は不要です。</p>
+    <a class="btn" href="https://testflight.apple.com/join/FGPpxUtx">初回ナビを入れる</a>
+  </div></div>
+
+  <div class="note"><span class="t">ANDROID</span><br>
+    Androidの子は店長からAPK(インストールファイル)を受け取って入れます。配布は店長に声をかけてください。</div>
+</section>
+
+<!-- ================================================================ -->
+<section id="join">
+  <div class="ch-head"><span class="no serif">第二章</span><h2>店舗に参加する</h2><span class="who-chip">キャスト・スタッフ</span></div>
+  <p class="lead">自分の携帯で行う操作です。店の<strong>招待コード</strong>を店長からもらってから始めてください。</p>
+
+  <div class="step"><div class="n">1</div><div class="body">
+    <h3>「招待コードで参加」を選ぶ</h3>
+    <p>アプリを開くと参加画面になります。上の切り替えで<strong>「招待コードで参加」</strong>を選び、店長からもらったコードを入力します。</p>
+    <div class="shot"><div class="phone">
+      <div class="notch"></div>
+      <div class="bar">Connect Crew</div>
+      <div class="seg"><div class="on">招待コードで参加</div><div>店舗を作成</div></div>
+      <div class="field">招待コード&nbsp;&nbsp;<b>DEZN-2026</b></div>
+      <div class="d">招待コードは店長(管理者)から共有してもらってください。コードを確認すると、店のメンバー一覧から自分を選べます。</div>
+      <div class="gbtn">コードを確認</div>
+    </div></div>
+  </div></div>
+
+  <div class="step"><div class="n">2</div><div class="body">
+    <h3>メンバー一覧から「自分」を選ぶ</h3>
+    <p>店の名簿が出てきます。<strong>自分の名前を選んで</strong>参加を申請します。名簿に自分がいなければ、新規参加として申請します。</p>
+    <div class="quote">機種変更した人も同じ画面で、以前の自分を選べば写真・プロフィールをそのまま引き継げます(管理者の承認後)。</div>
+    <div class="shot"><div class="phone">
+      <div class="notch"></div>
+      <div class="bar">メンバーの中からあなたを選択</div>
+      <div class="card">
+        <div class="row"><div class="ava">凪</div>凪<span class="tag">選択</span></div>
+        <div class="row"><div class="ava">ラ</div>ライ</div>
+        <div class="row"><div class="ava">レ</div>レン</div>
+      </div>
+      <div class="obtn">名簿にいない(新規参加)</div>
+      <div class="d" style="margin-top:8px">新規参加は管理者の承認後に使えるようになります。</div>
+    </div></div>
+  </div></div>
+
+  <div class="step"><div class="n">3</div><div class="body">
+    <h3>承認を待つ</h3>
+    <p>申請すると<strong>「承認待ちです」</strong>の画面になります。店長が承認すると<strong>自動で店に入れます</strong>(30秒ごとに自動確認)。急ぐときは店長に一声かけてください。</p>
+    <div class="shot"><div class="phone">
+      <div class="notch"></div>
+      <div class="wait">
+        <div class="big">承認待ちです</div>
+        <div class="d">管理者が役職を選んで承認すると、店舗に入れます。<br>承認されると自動でこの画面が切り替わります。</div>
+      </div>
+      <div class="obtn">承認状況を確認</div>
+    </div></div>
+  </div></div>
+</section>
+
+<!-- ================================================================ -->
+<section id="approve">
+  <div class="ch-head"><span class="no serif">第三章</span><h2>参加を承認する</h2><span class="who-chip">店長・管理者</span></div>
+  <p class="lead">参加申請は全員「承認待ち」から始まります(なりすまし防止)。承認は管理者の仕事です。</p>
+
+  <div class="step"><div class="n">1</div><div class="body">
+    <h3>招待コードを共有しておく</h3>
+    <p><strong>メンバータブ</strong>に店の招待コード(例 <span class="code-pill mono">DEZN-2026</span>)が表示されています。新しい人にはこのコードを送ってください。</p>
+  </div></div>
+
+  <div class="step"><div class="n">2</div><div class="body">
+    <h3>「新規参加承認」から承認する</h3>
+    <p>申請が来るとメンバータブに<strong>「新規参加承認」</strong>が出ます。本人かどうか確かめて、<strong>役職を選んでから承認</strong>します。</p>
+    <div class="shot"><div class="phone">
+      <div class="notch"></div>
+      <div class="bar">メンバー</div>
+      <div class="card">
+        <div class="h">新規参加承認</div>
+        <div class="row"><div class="ava">新</div>ひなた<span class="tag">承認待ち</span></div>
+        <div class="field">役職を選択&nbsp;&nbsp;<b>キャスト ▾</b></div>
+        <div class="gbtn">この役職で承認</div>
+      </div>
+      <div class="d">役職(管理者・内勤・幹部・キャスト)で使える機能が変わります。あとから「役職・権限」で変更できます。</div>
+    </div></div>
+  </div></div>
+
+  <div class="note"><span class="t">POINT</span><br>
+    承認した瞬間、本人の携帯は自動で店の中に切り替わります。本人への連絡は不要です。</div>
+</section>
+
+<!-- ================================================================ -->
+<section id="shokanavi">
+  <div class="ch-head"><span class="no serif">第四章</span><h2>初回ナビとつなぐ</h2><span class="who-chip">店長・管理者</span></div>
+  <p class="lead">初回ナビ(采配用アプリ)をConnect Crewと連携させると、割り振った初回時間がキャスト本人の携帯へ自動で届きます。使うコードは<strong>店の招待コードと同じもの</strong>です。</p>
+
+  <div class="step"><div class="n">1</div><div class="body">
+    <h3>初回ナビの設定を開く</h3>
+    <p>初回ナビを開き、<strong>設定 → ConnectCrew連携</strong>へ進みます。</p>
+  </div></div>
+
+  <div class="step"><div class="n">2</div><div class="body">
+    <h3>招待コードで連携する</h3>
+    <p><strong>「招待コードで連携する」</strong>を押してコードを入力すると、店舗名を読み込んで連携まで自動で完了します。</p>
+    <div class="shot"><div class="phone">
+      <div class="notch"></div>
+      <div class="bar">初回ナビ 設定</div>
+      <div class="card">
+        <div class="h">ConnectCrew連携</div>
+        <div class="d">割り振った初回時間をキャスト本人へ自動で届けます。連携にはこのアプリの招待コードが必要です。</div>
+        <div class="field">招待コード(例: DEZN-2026)</div>
+        <div class="gbtn">招待コードで連携する</div>
+      </div>
+      <div class="card"><div class="h" style="color:var(--phone-gold)">DEZON に接続中</div>
+        <div class="d">連携が済むとここに店舗名が表示されます。</div></div>
+    </div></div>
+  </div></div>
+
+  <div class="note"><span class="t">POINT</span><br>
+    Prince Book(顧客ノート)も同じ招待コードでつながります。コードは1つ覚えれば大丈夫です。</div>
+</section>
+
+<!-- ================================================================ -->
+<section id="roster">
+  <div class="ch-head"><span class="no serif">第五章</span><h2>キャスト名簿の読み込み</h2><span class="who-chip">店長・管理者</span></div>
+  <p class="lead">連携が済むと、キャスト名簿は初回ナビとConnect Crewの間で<strong>自動で同期</strong>します。手で二重登録する必要はありません。</p>
+
+  <div class="step"><div class="n">1</div><div class="body">
+    <h3>初回ナビで名簿を作る・保存する</h3>
+    <p>初回ナビ側で名簿を保存すると、Connect Crewの<strong>キャスト名簿に自動で反映</strong>されます。</p>
+  </div></div>
+
+  <div class="step"><div class="n">2</div><div class="body">
+    <h3>取り込みの提案が出たら「取り込む」</h3>
+    <p>逆にConnect Crew側に先にキャストがいる場合、初回ナビを開いたときに<strong>「Connect Crew のキャストを取り込み」</strong>という案内が出ます。取り込めば名簿が揃います。</p>
+  </div></div>
+
+  <div class="step"><div class="n">3</div><div class="body">
+    <h3>キャスト本人と名簿を結びつける</h3>
+    <p>キャストがアプリで参加するとき(第二章)に<strong>名簿から自分を選ぶ</strong>ことで、名簿上の子とアプリのアカウントがつながります。これで初回の通知が本人に届くようになります。</p>
+  </div></div>
+</section>
+
+<!-- ================================================================ -->
+<section id="faq">
+  <div class="ch-head"><span class="no serif">第六章</span><h2>つまずいたら</h2><span class="who-chip">全員</span></div>
+
+  <div class="step"><div class="n">?</div><div class="body">
+    <h3>「承認待ちです」のまま進まない</h3>
+    <p>店長がまだ承認していません。店長に「承認お願いします」と伝えてください。承認されれば自動で切り替わります(「承認状況を確認」ボタンで今すぐ確認もできます)。</p>
+  </div></div>
+
+  <div class="step"><div class="n">?</div><div class="body">
+    <h3>「招待コードが見つかりません」と出る</h3>
+    <p>コードの打ち間違いか、古いコードです。店長のメンバータブに出ている<strong>最新のコード</strong>をコピーして送ってもらってください。</p>
+  </div></div>
+
+  <div class="step"><div class="n">?</div><div class="body">
+    <h3>機種変更した・アプリを入れ直した</h3>
+    <p>新しい携帯で第二章と同じ手順で参加し、名簿から<strong>以前の自分</strong>を選んでください。新しい端末の再連携申請が店長へ届き、承認されるまで既存の写真・プロフィール・役職は変更されません。</p>
+  </div></div>
+
+  <div class="step"><div class="n">?</div><div class="body">
+    <h3>初回の通知が本人に届かない</h3>
+    <p>本人がまだ参加していない(第二章)か、名簿と結びついていません。本人の参加状況と、参加時に名簿から自分を選んだかを確認してください。</p>
+  </div></div>
+
+  <footer>
+    Connect Crew / 初回ナビ 導入ガイド ・ わからないことは店長まで
+  </footer>
+</section>
+
+</div>
+
+</body>
+</html>
